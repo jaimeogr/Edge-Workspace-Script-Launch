@@ -48,7 +48,7 @@ $workspaceID = $selectedWorkspace.id
 
 # Launch Microsoft Edge with the selected workspace
 Write-Host "Launching Microsoft Edge for workspace: $($selectedWorkspace.name)"
-Start-Process -FilePath "msedge.exe" -ArgumentList "--launch-workspace=$workspaceID --start-maximized"
+Start-Process -FilePath "msedge.exe" -ArgumentList "--launch-workspace=$workspaceID --start-maximized --no-startup-window"
 
 Write-Host "Workspace has been launched."
 exit

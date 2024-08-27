@@ -22,25 +22,47 @@ foreach ($workspace in $jsonContent.workspaces) {
 }
 Write-Host "0: Exit"  # Adding an option to exit
 
+
+# Function to read a single key input without requiring Enter
+function Read-SingleKey {
+    $key = $null
+    while ($key -eq $null) {
+        if ([System.Console]::KeyAvailable) {
+            $key = [System.Console]::ReadKey($true)
+        }
+    }
+    return $key
+}
+
 # Prompt user to select a workspace by number
 do {
-    $selectedIndex = Read-Host "Enter the number of the workspace you want to open (or 0 to exit)"
+    Write-Host "Enter the number of the workspace you want to open (or 0 to exit):"
 
-    # Check if the user wants to exit
-    if ($selectedIndex -eq '0') {
-        Write-Host "Exiting the script."
-        exit
-    }
+    $keyInfo = Read-SingleKey
 
-    # Validate the user's input
-    if ($selectedIndex -match '^\d+$' -and $selectedIndex -ge 1 -and $selectedIndex -le $jsonContent.workspaces.Count) {
-        $isValid = $true
+
+    # Check if the key input is a number
+    if ($keyInfo.KeyChar -match '^\d$') {
+        # Convert the key character to a string and then to an integer
+        $selectedIndex = [int]$keyInfo.KeyChar.ToString() 
+        
+        if ($selectedIndex -eq 0) {
+            Write-Host "Exiting the script."
+            exit
+        } elseif ($selectedIndex -ge 1 -and $selectedIndex -le $jsonContent.workspaces.Count) {
+            $isValid = $true
+        } else {
+            Write-Host "Invalid selection. Please enter a valid number between 1 and $($jsonContent.workspaces.Count), or 0 to exit."
+            $isValid = $false
+        }
     } else {
-        Write-Host "Invalid selection. Please enter a valid number between 1 and $($jsonContent.workspaces.Count), or 0 to exit."
+        Write-Host "Invalid input. Please enter a number."
         $isValid = $false
     }
 
 } until ($isValid)
+
+
 
 # Get the selected workspace
 $selectedWorkspace = $jsonContent.workspaces[$selectedIndex - 1]

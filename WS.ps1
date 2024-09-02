@@ -8,7 +8,7 @@ $jsonFilePath = "C:\Users\$username\AppData\Local\Microsoft\Edge\User Data\Defau
 $jsonContent = Get-Content -Path $jsonFilePath -Raw | ConvertFrom-Json
 
 # Check if the JSON content has workspaces
-if ($jsonContent.workspaces -eq $null) {
+if ($null -eq $jsonContent.workspaces) {
     Write-Host "No workspaces found in the JSON file."
     exit
 }
@@ -26,7 +26,7 @@ Write-Host "0: Exit"  # Adding an option to exit
 # Function to read a single key input without requiring Enter
 function Read-SingleKey {
     $key = $null
-    while ($key -eq $null) {
+    while ($null -eq $key) {
         if ([System.Console]::KeyAvailable) {
             $key = [System.Console]::ReadKey($true)
         }
@@ -49,13 +49,16 @@ do {
         if ($selectedIndex -eq 0) {
             Write-Host "Exiting the script."
             exit
-        } elseif ($selectedIndex -ge 1 -and $selectedIndex -le $jsonContent.workspaces.Count) {
+        }
+        elseif ($selectedIndex -ge 1 -and $selectedIndex -le $jsonContent.workspaces.Count) {
             $isValid = $true
-        } else {
+        }
+        else {
             Write-Host "Invalid selection. Please enter a valid number between 1 and $($jsonContent.workspaces.Count), or 0 to exit."
             $isValid = $false
         }
-    } else {
+    }
+    else {
         Write-Host "Invalid input. Please enter a number."
         $isValid = $false
     }
@@ -72,5 +75,59 @@ $workspaceID = $selectedWorkspace.id
 Write-Host "Launching Microsoft Edge for workspace: $($selectedWorkspace.name)"
 Start-Process -FilePath "msedge.exe" -ArgumentList "--launch-workspace=$workspaceID --start-maximized --no-startup-window"
 
-Write-Host "Workspace has been launched."
-exit
+# if the workspace has the word "ship", but "shipping" will be false. then it will prompt to open a project in visual studio code and a powershell window.
+if ($selectedWorkspace.name -match '\bship\b') {
+    Write-Host "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    $projectsFoldersPath = "C:\Users\$username\OneDrive\Documentos\Projects"
+	
+    # Check for available folders in the specified directory
+    $folders = Get-ChildItem -Path $projectsFoldersPath -Directory
+
+    if ($folders.Count -eq 0) {
+        Write-Host "No folders found in the directory: $projectsFoldersPath"
+    }
+    else {
+        Write-Host "Projects available:"
+        $counter = 1
+        foreach ($folder in $folders) {
+            Write-Host "$counter`: $($folder.Name)"
+            $counter++
+        }
+        Write-Host "0: Exit"  # Adding an option to exit
+
+
+        do {
+            Write-Host "Enter the number of the folder you want to open in Visual Studio and PowerShell:"
+            # Prompt user to select a folder
+            $keyStroke = Read-SingleKey
+            $selectedFolderIndex = [int]$keyStroke.KeyChar.ToString()
+
+
+            if ($selectedFolderIndex -eq 0) {
+                Write-Host "Exiting the script."
+                exit
+            }
+            if ($selectedFolderIndex -ge 1 -and $selectedFolderIndex -le $folders.Count) {
+                $selectedFolder = $folders[$selectedFolderIndex - 1].FullName
+                Write-Host "Opening Visual Studio and PowerShell in folder: $selectedFolder"
+            
+                # Open Visual Studio Code in the selected folder
+                Start-Process -FilePath "code" -ArgumentList $selectedFolder
+
+                # Open PowerShell in the selected folder
+                Start-Process -FilePath "powershell.exe" -WorkingDirectory $selectedFolder
+                $isValid = $true
+                Start-Sleep -Seconds 5  # Pauses the script for 5 seconds
+            }
+            else {
+                Write-Host "Invalid selection. Try Again."
+                $isValid = $false
+                Start-Sleep -Seconds 5  # Pauses the script for 5 seconds
+            }
+        } until ($isValid)
+        exit
+    }
+    else {
+        exit
+    }
+}

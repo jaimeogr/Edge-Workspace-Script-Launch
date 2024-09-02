@@ -34,6 +34,7 @@ function Read-SingleKey {
     return $key
 }
 
+
 # Prompt user to select a workspace by number
 do {
     Write-Host "Enter the number of the workspace you want to open (or 0 to exit):"
@@ -66,18 +67,13 @@ do {
 } until ($isValid)
 
 
-
 # Get the selected workspace
 $selectedWorkspace = $jsonContent.workspaces[$selectedIndex - 1]
 $workspaceID = $selectedWorkspace.id
 
-# Launch Microsoft Edge with the selected workspace
-Write-Host "Launching Microsoft Edge for workspace: $($selectedWorkspace.name)"
-Start-Process -FilePath "msedge.exe" -ArgumentList "--launch-workspace=$workspaceID --start-maximized --no-startup-window"
 
 # if the workspace has the word "ship", but "shipping" will be false. then it will prompt to open a project in visual studio code and a powershell window.
 if ($selectedWorkspace.name -match '\bship\b') {
-    Write-Host "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
     $projectsFoldersPath = "C:\Users\$username\OneDrive\Documentos\Projects"
 	
     # Check for available folders in the specified directory
@@ -85,8 +81,7 @@ if ($selectedWorkspace.name -match '\bship\b') {
 
     if ($folders.Count -eq 0) {
         Write-Host "No folders found in the directory: $projectsFoldersPath"
-    }
-    else {
+    } else {
         Write-Host "Projects available:"
         $counter = 1
         foreach ($folder in $folders) {
@@ -122,12 +117,13 @@ if ($selectedWorkspace.name -match '\bship\b') {
             else {
                 Write-Host "Invalid selection. Try Again."
                 $isValid = $false
-                Start-Sleep -Seconds 5  # Pauses the script for 5 seconds
             }
         } until ($isValid)
-        exit
-    }
-    else {
-        exit
     }
 }
+
+# Launch Microsoft Edge with the selected workspace
+Write-Host "Launching Microsoft Edge for workspace: $($selectedWorkspace.name)"
+Start-Process -FilePath "msedge.exe" -ArgumentList "--launch-workspace=$workspaceID --start-maximized --no-startup-window"
+
+exit

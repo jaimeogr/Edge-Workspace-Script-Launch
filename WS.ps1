@@ -73,7 +73,7 @@ $workspaceID = $selectedWorkspace.id
 
 
 # if the workspace has the word "ship", but "shipping" will be false. then it will prompt to open a project in visual studio code and a powershell window.
-if ($selectedWorkspace.name -match '\bship\b') {
+if ($selectedWorkspace.name -match '\bship\b' -or $selectedWorkspace.name -eq 'DS') {
     $projectsFoldersPath = "C:\Users\$username\OneDrive\Documentos\Projects"
 	
     # Check for available folders in the specified directory
@@ -107,12 +107,24 @@ if ($selectedWorkspace.name -match '\bship\b') {
                 Write-Host "Opening Visual Studio and PowerShell in folder: $selectedFolder"
             
                 # Open Visual Studio Code in the selected folder
+                # method 1
                 Start-Process -FilePath "code" -ArgumentList $selectedFolder
 
+                # method 2
+                #Start-Process cmd.exe -ArgumentList "/c code `"$selectedFolder`""
+
+
                 # Open PowerShell in the selected folder
+                #method 1
                 Start-Process -FilePath "powershell.exe" -WorkingDirectory $selectedFolder
+                
+                # method 2
+                #Set-Location $selectedFolder
+                #& powershell.exe -NoExit
+
+                # method 3
+                #Start-Process -FilePath "powershell.exe" -ArgumentList "-NoExit", "-Command", "cd `"$selectedFolder`""
                 $isValid = $true
-                Start-Sleep -Seconds 5  # Pauses the script for 5 seconds
             }
             else {
                 Write-Host "Invalid selection. Try Again."

@@ -90,13 +90,11 @@ if ($selectedWorkspace.name -match '\bship\b' -or $selectedWorkspace.name -eq 'D
         }
         Write-Host "0: Exit"  # Adding an option to exit
 
-
         do {
             Write-Host "Enter the number of the folder you want to open in Visual Studio and PowerShell:"
             # Prompt user to select a folder
             $keyStroke = Read-SingleKey
             $selectedFolderIndex = [int]$keyStroke.KeyChar.ToString()
-
 
             if ($selectedFolderIndex -eq 0) {
                 Write-Host "Exiting the script."
@@ -107,23 +105,10 @@ if ($selectedWorkspace.name -match '\bship\b' -or $selectedWorkspace.name -eq 'D
                 Write-Host "Opening Visual Studio and PowerShell in folder: $selectedFolder"
             
                 # Open Visual Studio Code in the selected folder
-                # method 1
-                Start-Process -FilePath "code" -ArgumentList $selectedFolder
-
-                # method 2
-                #Start-Process cmd.exe -ArgumentList "/c code `"$selectedFolder`""
-
-
+                Start-Process -FilePath "code" -ArgumentList $selectedFolder -WindowStyle Hidden
                 # Open PowerShell in the selected folder
-                #method 1
                 Start-Process -FilePath "powershell.exe" -WorkingDirectory $selectedFolder
-                
-                # method 2
-                #Set-Location $selectedFolder
-                #& powershell.exe -NoExit
 
-                # method 3
-                #Start-Process -FilePath "powershell.exe" -ArgumentList "-NoExit", "-Command", "cd `"$selectedFolder`""
                 $isValid = $true
             }
             else {

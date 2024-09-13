@@ -28,7 +28,7 @@ function Show-ListOfItems {
         [string[]]$Items
     )
     for ($i = 0; $i -lt $Items.Count; $i++) {
-        $currentChar = $globalValidCharacters[$i+1]  # Select a character from the global valid characters
+        $currentChar = $globalValidCharacters[$i + 1]  # Select a character from the global valid characters
         Write-Host "${currentChar}: $($Items[$i])"  
     }
     Write-Host "0: Exit"  # Adding an option to exit
@@ -51,7 +51,8 @@ function Read-SingleKey {
             # Check if the uppercase character is in the list of valid characters
             if ($globalValidCharacters.Substring(0, $Number_Of_Items) -contains $inputChar) {
                 return $inputChar  # Return the valid uppercase character
-            } else {
+            }
+            else {
                 # Invalid key, reset $key to null to keep waiting
                 $key = $null
             }
@@ -77,24 +78,33 @@ Show-ListOfItems -Items $workspacesArray
 
 
 # Prompt user to select a workspace by index
-do {
-    Write-Host "Enter the key of the workspace you want to open (or 0 to exit):"
-    $keyInfo = Read-SingleKey -Number_Of_Items $workspacesArray.Count
+Write-Host "Enter the key of the workspace you want to open (or 0 to exit):"
+$keyStroke = Read-SingleKey -Number_Of_Items $workspacesArray.Count
 
-    if ($keyInfo -eq 0) {
-        Write-Host "Exiting the script."
-        exit
-    }
-} until ($isValid)
+Write-Host "keyStroke: $keyStroke"
+
+
+if ($keyStroke -eq 0) {
+    Write-Host "Exiting the script."
+    exit
+}
+
+
+Write-Host "keyInfo: $keyStroke"
 
 
 # Get the index of the character
-$index = $globalValidCharacters.IndexOf($charToFind)
+$index = $globalValidCharacters.IndexOf($keyInfo)
 
 # Get the selected workspace
 $selectedWorkspace = $jsonContent.workspaces[$index]
 $workspaceID = $selectedWorkspace.id
 $workspaceName = $selectedWorkspace.name
+
+Write-Host "Workspace: $selectedWorkspace"
+Write-Host "ID: $workspaceID"
+Write-Host "Name: $workspaceName"
+
 
 
 # if the workspace has the word "ship", but "shipping" will be false. then it will prompt to open a project in visual studio code and a powershell window.
@@ -106,7 +116,8 @@ if ($selectedWorkspace.name -match '\bship\b' -or $selectedWorkspace.name -eq 'D
 
     if ($folders.Count -eq 0) {
         Write-Host "No folders found in the directory: $projectsFoldersPath"
-    } else {
+    }
+    else {
         Write-Host "Projects available:"
         $counter = 1
         foreach ($folder in $folders) {

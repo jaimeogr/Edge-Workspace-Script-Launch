@@ -13,27 +13,53 @@ if ($null -eq $jsonContent.workspaces) {
     exit
 }
 
-# Enumerate each workspace with a number and its name
-Write-Host "Available Workspaces:"
-$counter = 1
+# Enumerate each workspace and append its name to a new array
+$workspacesArray = @()
 foreach ($workspace in $jsonContent.workspaces) {
-    Write-Host "$counter`: $($workspace.name)"
-    $counter++
+    $workspacesArray += $workspace.name
 }
-Write-Host "0: Exit"  # Adding an option to exit
-
 
 # Function to read a single key input without requiring Enter
+$globalValidCharacters = "0123456789QWERTYUIOPASDFGHJKLZXCVBNM"
+
+# displays items for workspaces or for projects
+function Show-ListOfItems {
+    param (
+        [string[]]$Items
+    )
+    for ($i = 0; $i -lt $Items.Count; $i++) {
+        $currentChar = $globalValidCharacters[$i]  # Select a character from the global valid characters
+        Write-Host "${currentChar}: $($Items[$i])"  
+    }
+    Write-Host "0: Exit"  # Adding an option to exit
+}
+
+# reads a single keystroke from the globalValidCharacters variable
 function Read-SingleKey {
+    param (
+        [int]$Number_Of_Items
+    )
+    $Number_Of_Items = $Number_Of_Items + 1 #to consider the 0, the first value
     $key = $null
     while ($null -eq $key) {
         if ([System.Console]::KeyAvailable) {
             $key = [System.Console]::ReadKey($true)
+
+            # Convert the pressed key to uppercase
+            $inputChar = $key.KeyChar.ToString().ToUpper()
+
+            # Check if the uppercase character is in the list of valid characters
+            if ($validCharacters.Substring(0, $Number_Of_Items) -contains $inputChar) {
+                return $inputChar  # Return the valid uppercase character
+            } else {
+                # Invalid key, reset $key to null to keep waiting
+                $key = $null
+            }
         }
     }
-    return $key
 }
 
+# launches edge workspace window
 function Open-EdgeWorkspaceWindow {
     param (
         [string]$Selected_Workspace_Name,
@@ -46,42 +72,34 @@ function Open-EdgeWorkspaceWindow {
 }
 
 
-# Prompt user to select a workspace by number
+# Enumerate each workspace with an index and its name
+Show-ListOfItems -Items $workspacesArray
+
+
+# Prompt user to select a workspace by index
 do {
-    Write-Host "Enter the number of the workspace you want to open (or 0 to exit):"
+    Write-Host "Enter the key of the workspace you want to open (or 0 to exit):"
+    $keyInfo = Read-SingleKey -Number_Of_Items $jsonContent.workspaces.Count
 
-    $keyInfo = Read-SingleKey
-
-
-    # Check if the key input is a number
-    if ($keyInfo.KeyChar -match '^\d$') {
-        # Convert the key character to a string and then to an integer
-        $selectedIndex = [int]$keyInfo.KeyChar.ToString() 
-        
-        if ($selectedIndex -eq 0) {
-            Write-Host "Exiting the script."
-            exit
-        }
-        elseif ($selectedIndex -ge 1 -and $selectedIndex -le $jsonContent.workspaces.Count) {
-            $isValid = $true
-        }
-        else {
-            Write-Host "Invalid selection. Please enter a valid number between 1 and $($jsonContent.workspaces.Count), or 0 to exit."
-            $isValid = $false
-        }
+    if ($keyInfo -eq 0) {
+        Write-Host "Exiting the script."
+        exit
     }
-    else {
-        Write-Host "Invalid input. Please enter a number."
-        $isValid = $false
-    }
-
 } until ($isValid)
 
 
+# Get the index of the character
+$index = $globalValidCharacters.IndexOf($charToFind)
+
 # Get the selected workspace
-$selectedWorkspace = $jsonContent.workspaces[$selectedIndex - 1]
+$selectedWorkspace = $jsonContent.workspaces[$index]
 $workspaceID = $selectedWorkspace.id
 $workspaceName = $selectedWorkspace.name
+
+
+
+exit
+
 
 
 # if the workspace has the word "ship", but "shipping" will be false. then it will prompt to open a project in visual studio code and a powershell window.
@@ -121,6 +139,7 @@ if ($selectedWorkspace.name -match '\bship\b' -or $selectedWorkspace.name -eq 'D
                 Start-Process -FilePath "code" -ArgumentList $selectedFolder -WindowStyle Hidden
                 # Open PowerShell in the selected folder
                 Start-Process -FilePath "powershell.exe" -WorkingDirectory $selectedFolder -WindowStyle Maximized
+                Open-EdgeWorkspaceWindow -Selected_Workspace_ID $workspaceID -Selected_Workspace_Name $workspaceName
 
                 $isValid = $true
             }
@@ -131,7 +150,3 @@ if ($selectedWorkspace.name -match '\bship\b' -or $selectedWorkspace.name -eq 'D
         } until ($isValid)
     }
 }
-
-Open-EdgeWorkspaceWindow -Selected_Workspace_ID $workspaceID -Selected_Workspace_Name $workspaceName
-
-exit

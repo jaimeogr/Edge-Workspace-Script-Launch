@@ -48,9 +48,7 @@ function Read-SingleKey {
             # Convert the pressed key to uppercase
             $inputChar = $key.KeyChar.ToString().ToUpper()
 
-            Write-Host "$inputChar"
             $substring = $globalValidCharacters.Substring(1, $Number_Of_Items)
-            Write-Host "$substring"
             
             if($inputChar -eq 0){
                 $key = '0'
@@ -84,12 +82,8 @@ function Open-EdgeWorkspaceWindow {
 # Enumerate each workspace with an index and its name
 Show-ListOfItems -Items $workspacesArray
 
-
 # Prompt user to select a workspace by index
 $keyStroke = Read-SingleKey -Number_Of_Items $workspacesArray.Count
-
-Write-Host "keyStroke: $keyStroke"
-
 
 if ($keyStroke -eq 0) {
     Write-Host "Exiting the script."
@@ -97,35 +91,13 @@ if ($keyStroke -eq 0) {
 }
 
 
-Write-Host "keyStroke type: $($keyStroke.GetType())"
-Write-Host "keyStroke length: $($keyStroke.Length)"
-Write-Host "keyStroke: ${keyStroke}"
-Write-Host "keyStroke: ${keyStroke}"
-
-# # Display ASCII or Unicode values for keyStroke
-# $keyStrokeBytes = [System.Text.Encoding]::UTF8.GetBytes($keyStroke)
-# Write-Host "keyStroke byte values: $($keyStrokeBytes -join ', ')"
-
-# # Display ASCII or Unicode values for globalValidCharacters
-# $globalValidCharactersBytes = [System.Text.Encoding]::UTF8.GetBytes($globalValidCharacters)
-# Write-Host "globalValidCharacters byte values: $($globalValidCharactersBytes -join ', ')"
-
-
 # Get the index of the character
 $index = $globalValidCharacters.IndexOf([char]$keyStroke) - 1
-Write-Host "index: $index"
-Write-Host "index: $index"
-
 
 # Get the selected workspace
 $selectedWorkspace = $jsonContent.workspaces[$index]
 $workspaceID = $selectedWorkspace.id
 $workspaceName = $selectedWorkspace.name
-
-Write-Host "Workspace: $selectedWorkspace"
-Write-Host "ID: $workspaceID"
-Write-Host "Name: $workspaceName"
-
 
 
 # if the workspace has the word "ship", but "shipping" will be false. then it will prompt to open a project in visual studio code and a powershell window.
@@ -135,7 +107,6 @@ if ($selectedWorkspace.name -match '\bship\b' -or $selectedWorkspace.name -eq 'D
     # Check for available folders in the specified directory
     $folders = Get-ChildItem -Path $projectsFoldersPath -Directory
 
-    $folders[0]
     if ($folders.Count -eq 0) {
         Write-Host "No folders found in the directory: $projectsFoldersPath"
     }
@@ -144,11 +115,10 @@ if ($selectedWorkspace.name -match '\bship\b' -or $selectedWorkspace.name -eq 'D
         foreach ($f in $folders) {
             $foldersArray += $f.Name
         }
-        Write-Host "Projects available:"
+        Write-Host "`nProjects available:"
         Show-ListOfItems -Items $foldersArray
 
         $chosenFolder = Read-SingleKey -Number_Of_Items $foldersArray.Count
-        Write-Host "chosenFolder: $chosenFolder"
 
         if ($chosenFolder -eq 0) {
             Open-EdgeWorkspaceWindow -Selected_Workspace_ID $workspaceID -Selected_Workspace_Name $workspaceName

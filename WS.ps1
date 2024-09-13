@@ -145,38 +145,22 @@ if ($selectedWorkspace.name -match '\bship\b' -or $selectedWorkspace.name -eq 'D
 
         $chosenFolder = Read-SingleKey -Number_Of_Items $foldersArray.Count
         Write-Host "chosenFolder: $chosenFolder"
-        Write-Host "chosenFolder: $chosenFolder"
 
-        Start-Sleep -Seconds 8
+        if ($chosenFolder -eq 0) {
+            Open-EdgeWorkspaceWindow -Selected_Workspace_ID $workspaceID -Selected_Workspace_Name $workspaceName
+            Write-Host "Exiting the script."
+            exit
+        } else {
+            $folderIndex = $globalValidCharacters.IndexOf([char]$chosenFolder) - 1
+            $selectedFolder = $folders[$folderIndex].FullName
+            Write-Host "Opening Visual Studio and PowerShell in folder: $selectedFolder"
+            # Open Visual Studio Code in the selected folder
+            Start-Process -FilePath "code" -ArgumentList $selectedFolder -WindowStyle Hidden
+            # Open PowerShell in the selected folder
+            Start-Process -FilePath "powershell.exe" -WorkingDirectory $selectedFolder -WindowStyle Maximized
+            Open-EdgeWorkspaceWindow -Selected_Workspace_ID $workspaceID -Selected_Workspace_Name $workspaceName
 
-        do {
-            Write-Host "Enter the number of the folder you want to open in Visual Studio and PowerShell:"
-            # Prompt user to select a folder
-            $keyStroke = Read-SingleKey
-            $selectedFolderIndex = [int]$keyStroke.KeyChar.ToString()
-
-            if ($selectedFolderIndex -eq 0) {
-                Open-EdgeWorkspaceWindow -Selected_Workspace_ID $workspaceID -Selected_Workspace_Name $workspaceName
-                Write-Host "Exiting the script."
-                exit
-            }
-            if ($selectedFolderIndex -ge 1 -and $selectedFolderIndex -le $folders.Count) {
-                $selectedFolder = $folders[$selectedFolderIndex - 1].FullName
-                Write-Host "Opening Visual Studio and PowerShell in folder: $selectedFolder"
-            
-                # Open Visual Studio Code in the selected folder
-                Start-Process -FilePath "code" -ArgumentList $selectedFolder -WindowStyle Hidden
-                # Open PowerShell in the selected folder
-                Start-Process -FilePath "powershell.exe" -WorkingDirectory $selectedFolder -WindowStyle Maximized
-                Open-EdgeWorkspaceWindow -Selected_Workspace_ID $workspaceID -Selected_Workspace_Name $workspaceName
-
-                $isValid = $true
-            }
-            else {
-                Write-Host "Invalid selection. Try Again."
-                $isValid = $false
-            }
-        } until ($isValid)
+        }
     }
 }
 

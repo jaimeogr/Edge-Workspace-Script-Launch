@@ -28,7 +28,7 @@ function Show-ListOfItems {
         [string[]]$Items
     )
     for ($i = 0; $i -lt $Items.Count; $i++) {
-        $currentChar = $globalValidCharacters[$i]  # Select a character from the global valid characters
+        $currentChar = $globalValidCharacters[$i+1]  # Select a character from the global valid characters
         Write-Host "${currentChar}: $($Items[$i])"  
     }
     Write-Host "0: Exit"  # Adding an option to exit
@@ -49,7 +49,7 @@ function Read-SingleKey {
             $inputChar = $key.KeyChar.ToString().ToUpper()
 
             # Check if the uppercase character is in the list of valid characters
-            if ($validCharacters.Substring(0, $Number_Of_Items) -contains $inputChar) {
+            if ($globalValidCharacters.Substring(0, $Number_Of_Items) -contains $inputChar) {
                 return $inputChar  # Return the valid uppercase character
             } else {
                 # Invalid key, reset $key to null to keep waiting
@@ -79,7 +79,7 @@ Show-ListOfItems -Items $workspacesArray
 # Prompt user to select a workspace by index
 do {
     Write-Host "Enter the key of the workspace you want to open (or 0 to exit):"
-    $keyInfo = Read-SingleKey -Number_Of_Items $jsonContent.workspaces.Count
+    $keyInfo = Read-SingleKey -Number_Of_Items $workspacesArray.Count
 
     if ($keyInfo -eq 0) {
         Write-Host "Exiting the script."
@@ -95,11 +95,6 @@ $index = $globalValidCharacters.IndexOf($charToFind)
 $selectedWorkspace = $jsonContent.workspaces[$index]
 $workspaceID = $selectedWorkspace.id
 $workspaceName = $selectedWorkspace.name
-
-
-
-exit
-
 
 
 # if the workspace has the word "ship", but "shipping" will be false. then it will prompt to open a project in visual studio code and a powershell window.
@@ -150,3 +145,6 @@ if ($selectedWorkspace.name -match '\bship\b' -or $selectedWorkspace.name -eq 'D
         } until ($isValid)
     }
 }
+
+
+exit

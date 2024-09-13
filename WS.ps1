@@ -51,7 +51,11 @@ function Read-SingleKey {
             Write-Host "$inputChar"
             $substring = $globalValidCharacters.Substring(1, $Number_Of_Items)
             Write-Host "$substring"
-
+            
+            if($inputChar -eq 0){
+                $key = '0'
+                return $key
+            }
             # Check if the uppercase character is in the list of valid characters
             if ($substring.Contains($inputChar)) {
                 return $inputChar  # Return the valid uppercase character
@@ -158,11 +162,11 @@ if ($selectedWorkspace.name -match '\bship\b' -or $selectedWorkspace.name -eq 'D
             Start-Process -FilePath "code" -ArgumentList $selectedFolder -WindowStyle Hidden
             # Open PowerShell in the selected folder
             Start-Process -FilePath "powershell.exe" -WorkingDirectory $selectedFolder -WindowStyle Maximized
-            Open-EdgeWorkspaceWindow -Selected_Workspace_ID $workspaceID -Selected_Workspace_Name $workspaceName
-
         }
     }
 }
 
+
+Open-EdgeWorkspaceWindow -Selected_Workspace_ID $workspaceID -Selected_Workspace_Name $workspaceName
 
 exit

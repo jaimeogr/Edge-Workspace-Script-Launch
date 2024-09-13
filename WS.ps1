@@ -33,6 +33,19 @@ function Show-ListOfItems {
     }
     Write-Host "0: Exit"  # Adding an option to exit
 }
+function Get-PositionOfCharacter {
+    param (
+        [char]$char
+    )
+    # Loop through the valid characters string
+    for ($c = 0; $c -lt $globalValidCharacters.Length; $c++) {
+        # Compare each character in the global valid characters string
+        if ($globalValidCharacters[$c] -eq $char) {
+            return $c  # Return the index if found
+        }
+    }
+    return $null  # Return $null if the character is not found
+}
 
 # reads a single keystroke from the globalValidCharacters variable
 function Read-SingleKey {
@@ -48,8 +61,12 @@ function Read-SingleKey {
             # Convert the pressed key to uppercase
             $inputChar = $key.KeyChar.ToString().ToUpper()
 
+            Write-Host "$inputChar"
+            $substring = $globalValidCharacters.Substring(1, $Number_Of_Items)
+            Write-Host "$substring"
+
             # Check if the uppercase character is in the list of valid characters
-            if ($globalValidCharacters.Substring(0, $Number_Of_Items) -contains $inputChar) {
+            if ($substring.Contains($inputChar)) {
                 return $inputChar  # Return the valid uppercase character
             }
             else {
@@ -90,11 +107,25 @@ if ($keyStroke -eq 0) {
 }
 
 
-Write-Host "keyInfo: $keyStroke"
+Write-Host "keyStroke type: $($keyStroke.GetType())"
+Write-Host "keyStroke length: $($keyStroke.Length)"
+Write-Host "keyStroke: ${keyStroke}"
+Write-Host "keyStroke: ${keyStroke}"
+
+# # Display ASCII or Unicode values for keyStroke
+# $keyStrokeBytes = [System.Text.Encoding]::UTF8.GetBytes($keyStroke)
+# Write-Host "keyStroke byte values: $($keyStrokeBytes -join ', ')"
+
+# # Display ASCII or Unicode values for globalValidCharacters
+# $globalValidCharactersBytes = [System.Text.Encoding]::UTF8.GetBytes($globalValidCharacters)
+# Write-Host "globalValidCharacters byte values: $($globalValidCharactersBytes -join ', ')"
 
 
 # Get the index of the character
-$index = $globalValidCharacters.IndexOf($keyInfo)
+$index = $globalValidCharacters.IndexOf([char]$keyStroke) - 1
+Write-Host "index: $index"
+Write-Host "index: $index"
+
 
 # Get the selected workspace
 $selectedWorkspace = $jsonContent.workspaces[$index]

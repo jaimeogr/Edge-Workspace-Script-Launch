@@ -33,19 +33,6 @@ function Show-ListOfItems {
     }
     Write-Host "0: Exit"  # Adding an option to exit
 }
-function Get-PositionOfCharacter {
-    param (
-        [char]$char
-    )
-    # Loop through the valid characters string
-    for ($c = 0; $c -lt $globalValidCharacters.Length; $c++) {
-        # Compare each character in the global valid characters string
-        if ($globalValidCharacters[$c] -eq $char) {
-            return $c  # Return the index if found
-        }
-    }
-    return $null  # Return $null if the character is not found
-}
 
 # reads a single keystroke from the globalValidCharacters variable
 function Read-SingleKey {
@@ -95,7 +82,6 @@ Show-ListOfItems -Items $workspacesArray
 
 
 # Prompt user to select a workspace by index
-Write-Host "Enter the key of the workspace you want to open (or 0 to exit):"
 $keyStroke = Read-SingleKey -Number_Of_Items $workspacesArray.Count
 
 Write-Host "keyStroke: $keyStroke"
@@ -145,17 +131,23 @@ if ($selectedWorkspace.name -match '\bship\b' -or $selectedWorkspace.name -eq 'D
     # Check for available folders in the specified directory
     $folders = Get-ChildItem -Path $projectsFoldersPath -Directory
 
+    $folders[0]
     if ($folders.Count -eq 0) {
         Write-Host "No folders found in the directory: $projectsFoldersPath"
     }
     else {
-        Write-Host "Projects available:"
-        $counter = 1
-        foreach ($folder in $folders) {
-            Write-Host "$counter`: $($folder.Name)"
-            $counter++
+        $foldersArray = @()
+        foreach ($f in $folders) {
+            $foldersArray += $f.Name
         }
-        Write-Host "0: Exit"  # Adding an option to exit
+        Write-Host "Projects available:"
+        Show-ListOfItems -Items $foldersArray
+
+        $chosenFolder = Read-SingleKey -Number_Of_Items $foldersArray.Count
+        Write-Host "chosenFolder: $chosenFolder"
+        Write-Host "chosenFolder: $chosenFolder"
+
+        Start-Sleep -Seconds 8
 
         do {
             Write-Host "Enter the number of the folder you want to open in Visual Studio and PowerShell:"

@@ -13,27 +13,62 @@ if ($null -eq $jsonContent.workspaces) {
     exit
 }
 
-# Enumerate each workspace with a number and its name
-Write-Host "Available Workspaces:"
-$counter = 1
+# Enumerate each workspace and append its name to a new array
+$workspacesArray = @()
 foreach ($workspace in $jsonContent.workspaces) {
-    Write-Host "$counter`: $($workspace.name)"
-    $counter++
+    $workspacesArray += $workspace.name
 }
-Write-Host "0: Exit"  # Adding an option to exit
-
 
 # Function to read a single key input without requiring Enter
+$globalValidCharacters = "0123456789QWERTYUIOPASDFGHJKLZXCVBNM"
+
+# displays items for workspaces or for projects
+function Show-ListOfItems {
+    param (
+        [string[]]$Items
+    )
+    for ($i = 0; $i -lt $Items.Count; $i++) {
+        $currentChar = $globalValidCharacters[$i + 1]  # Select a character from the global valid characters
+        Write-Host "${currentChar}: $($Items[$i])"  
+    }
+    Write-Host "0: Exit"  # Adding an option to exit
+}
+
+# reads a single keystroke from the globalValidCharacters variable
 function Read-SingleKey {
+    param (
+        [int]$Number_Of_Items
+    )
+    $Number_Of_Items = $Number_Of_Items + 1 #to consider the 0, the first value
     $key = $null
     while ($null -eq $key) {
         if ([System.Console]::KeyAvailable) {
             $key = [System.Console]::ReadKey($true)
+
+            # Convert the pressed key to uppercase
+            $inputChar = $key.KeyChar.ToString().ToUpper()
+
+            Write-Host "$inputChar"
+            $substring = $globalValidCharacters.Substring(1, $Number_Of_Items)
+            Write-Host "$substring"
+            
+            if($inputChar -eq 0){
+                $key = '0'
+                return $key
+            }
+            # Check if the uppercase character is in the list of valid characters
+            if ($substring.Contains($inputChar)) {
+                return $inputChar  # Return the valid uppercase character
+            }
+            else {
+                # Invalid key, reset $key to null to keep waiting
+                $key = $null
+            }
         }
     }
-    return $key
 }
 
+# launches edge workspace window
 function Open-EdgeWorkspaceWindow {
     param (
         [string]$Selected_Workspace_Name,
@@ -46,42 +81,51 @@ function Open-EdgeWorkspaceWindow {
 }
 
 
-# Prompt user to select a workspace by number
-do {
-    Write-Host "Enter the number of the workspace you want to open (or 0 to exit):"
-
-    $keyInfo = Read-SingleKey
+# Enumerate each workspace with an index and its name
+Show-ListOfItems -Items $workspacesArray
 
 
-    # Check if the key input is a number
-    if ($keyInfo.KeyChar -match '^\d$') {
-        # Convert the key character to a string and then to an integer
-        $selectedIndex = [int]$keyInfo.KeyChar.ToString() 
-        
-        if ($selectedIndex -eq 0) {
-            Write-Host "Exiting the script."
-            exit
-        }
-        elseif ($selectedIndex -ge 1 -and $selectedIndex -le $jsonContent.workspaces.Count) {
-            $isValid = $true
-        }
-        else {
-            Write-Host "Invalid selection. Please enter a valid number between 1 and $($jsonContent.workspaces.Count), or 0 to exit."
-            $isValid = $false
-        }
-    }
-    else {
-        Write-Host "Invalid input. Please enter a number."
-        $isValid = $false
-    }
+# Prompt user to select a workspace by index
+$keyStroke = Read-SingleKey -Number_Of_Items $workspacesArray.Count
 
-} until ($isValid)
+Write-Host "keyStroke: $keyStroke"
+
+
+if ($keyStroke -eq 0) {
+    Write-Host "Exiting the script."
+    exit
+}
+
+
+Write-Host "keyStroke type: $($keyStroke.GetType())"
+Write-Host "keyStroke length: $($keyStroke.Length)"
+Write-Host "keyStroke: ${keyStroke}"
+Write-Host "keyStroke: ${keyStroke}"
+
+# # Display ASCII or Unicode values for keyStroke
+# $keyStrokeBytes = [System.Text.Encoding]::UTF8.GetBytes($keyStroke)
+# Write-Host "keyStroke byte values: $($keyStrokeBytes -join ', ')"
+
+# # Display ASCII or Unicode values for globalValidCharacters
+# $globalValidCharactersBytes = [System.Text.Encoding]::UTF8.GetBytes($globalValidCharacters)
+# Write-Host "globalValidCharacters byte values: $($globalValidCharactersBytes -join ', ')"
+
+
+# Get the index of the character
+$index = $globalValidCharacters.IndexOf([char]$keyStroke) - 1
+Write-Host "index: $index"
+Write-Host "index: $index"
 
 
 # Get the selected workspace
-$selectedWorkspace = $jsonContent.workspaces[$selectedIndex - 1]
+$selectedWorkspace = $jsonContent.workspaces[$index]
 $workspaceID = $selectedWorkspace.id
 $workspaceName = $selectedWorkspace.name
+
+Write-Host "Workspace: $selectedWorkspace"
+Write-Host "ID: $workspaceID"
+Write-Host "Name: $workspaceName"
+
 
 
 # if the workspace has the word "ship", but "shipping" will be false. then it will prompt to open a project in visual studio code and a powershell window.
@@ -91,46 +135,37 @@ if ($selectedWorkspace.name -match '\bship\b' -or $selectedWorkspace.name -eq 'D
     # Check for available folders in the specified directory
     $folders = Get-ChildItem -Path $projectsFoldersPath -Directory
 
+    $folders[0]
     if ($folders.Count -eq 0) {
         Write-Host "No folders found in the directory: $projectsFoldersPath"
-    } else {
-        Write-Host "Projects available:"
-        $counter = 1
-        foreach ($folder in $folders) {
-            Write-Host "$counter`: $($folder.Name)"
-            $counter++
+    }
+    else {
+        $foldersArray = @()
+        foreach ($f in $folders) {
+            $foldersArray += $f.Name
         }
-        Write-Host "0: Exit"  # Adding an option to exit
+        Write-Host "Projects available:"
+        Show-ListOfItems -Items $foldersArray
 
-        do {
-            Write-Host "Enter the number of the folder you want to open in Visual Studio and PowerShell:"
-            # Prompt user to select a folder
-            $keyStroke = Read-SingleKey
-            $selectedFolderIndex = [int]$keyStroke.KeyChar.ToString()
+        $chosenFolder = Read-SingleKey -Number_Of_Items $foldersArray.Count
+        Write-Host "chosenFolder: $chosenFolder"
 
-            if ($selectedFolderIndex -eq 0) {
-                Open-EdgeWorkspaceWindow -Selected_Workspace_ID $workspaceID -Selected_Workspace_Name $workspaceName
-                Write-Host "Exiting the script."
-                exit
-            }
-            if ($selectedFolderIndex -ge 1 -and $selectedFolderIndex -le $folders.Count) {
-                $selectedFolder = $folders[$selectedFolderIndex - 1].FullName
-                Write-Host "Opening Visual Studio and PowerShell in folder: $selectedFolder"
-            
-                # Open Visual Studio Code in the selected folder
-                Start-Process -FilePath "code" -ArgumentList $selectedFolder -WindowStyle Hidden
-                # Open PowerShell in the selected folder
-                Start-Process -FilePath "powershell.exe" -WorkingDirectory $selectedFolder -WindowStyle Maximized
-
-                $isValid = $true
-            }
-            else {
-                Write-Host "Invalid selection. Try Again."
-                $isValid = $false
-            }
-        } until ($isValid)
+        if ($chosenFolder -eq 0) {
+            Open-EdgeWorkspaceWindow -Selected_Workspace_ID $workspaceID -Selected_Workspace_Name $workspaceName
+            Write-Host "Exiting the script."
+            exit
+        } else {
+            $folderIndex = $globalValidCharacters.IndexOf([char]$chosenFolder) - 1
+            $selectedFolder = $folders[$folderIndex].FullName
+            Write-Host "Opening Visual Studio and PowerShell in folder: $selectedFolder"
+            # Open Visual Studio Code in the selected folder
+            Start-Process -FilePath "code" -ArgumentList $selectedFolder -WindowStyle Hidden
+            # Open PowerShell in the selected folder
+            Start-Process -FilePath "powershell.exe" -WorkingDirectory $selectedFolder -WindowStyle Maximized
+        }
     }
 }
+
 
 Open-EdgeWorkspaceWindow -Selected_Workspace_ID $workspaceID -Selected_Workspace_Name $workspaceName
 

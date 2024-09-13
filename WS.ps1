@@ -34,6 +34,17 @@ function Read-SingleKey {
     return $key
 }
 
+function Open-EdgeWorkspaceWindow {
+    param (
+        [string]$Selected_Workspace_Name,
+        [string]$Selected_Workspace_ID
+    )
+    Write-Host "Will open workspace id: $($Selected_Workspace_ID)"
+    # Launch Microsoft Edge with the selected workspace
+    Write-Host "Launching Microsoft Edge for workspace: $($Selected_Workspace_Name)"
+    Start-Process -FilePath "msedge.exe" -ArgumentList "--launch-workspace=$Selected_Workspace_ID --start-maximized --no-startup-window"
+}
+
 
 # Prompt user to select a workspace by number
 do {
@@ -70,6 +81,7 @@ do {
 # Get the selected workspace
 $selectedWorkspace = $jsonContent.workspaces[$selectedIndex - 1]
 $workspaceID = $selectedWorkspace.id
+$workspaceName = $selectedWorkspace.name
 
 
 # if the workspace has the word "ship", but "shipping" will be false. then it will prompt to open a project in visual studio code and a powershell window.
@@ -97,6 +109,7 @@ if ($selectedWorkspace.name -match '\bship\b' -or $selectedWorkspace.name -eq 'D
             $selectedFolderIndex = [int]$keyStroke.KeyChar.ToString()
 
             if ($selectedFolderIndex -eq 0) {
+                Open-EdgeWorkspaceWindow -Selected_Workspace_ID $workspaceID -Selected_Workspace_Name $workspaceName
                 Write-Host "Exiting the script."
                 exit
             }
@@ -107,7 +120,7 @@ if ($selectedWorkspace.name -match '\bship\b' -or $selectedWorkspace.name -eq 'D
                 # Open Visual Studio Code in the selected folder
                 Start-Process -FilePath "code" -ArgumentList $selectedFolder -WindowStyle Hidden
                 # Open PowerShell in the selected folder
-                Start-Process -FilePath "powershell.exe" -WorkingDirectory $selectedFolder
+                Start-Process -FilePath "powershell.exe" -WorkingDirectory $selectedFolder -WindowStyle Maximized
 
                 $isValid = $true
             }
@@ -119,8 +132,6 @@ if ($selectedWorkspace.name -match '\bship\b' -or $selectedWorkspace.name -eq 'D
     }
 }
 
-# Launch Microsoft Edge with the selected workspace
-Write-Host "Launching Microsoft Edge for workspace: $($selectedWorkspace.name)"
-Start-Process -FilePath "msedge.exe" -ArgumentList "--launch-workspace=$workspaceID --start-maximized --no-startup-window"
+Open-EdgeWorkspaceWindow -Selected_Workspace_ID $workspaceID -Selected_Workspace_Name $workspaceName
 
 exit

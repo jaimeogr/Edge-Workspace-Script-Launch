@@ -127,9 +127,13 @@ if ($selectedWorkspace.name -match '\bship\b' -or $selectedWorkspace.name -eq 'D
         } else {
             $folderIndex = $globalValidCharacters.IndexOf([char]$chosenFolder) - 1
             $selectedFolder = $folders[$folderIndex].FullName
-            Write-Host "Opening Visual Studio and PowerShell in folder: $selectedFolder"
+            
+            # Open the selected folder in File Explorer
+            Start-Process explorer.exe -ArgumentList $selectedFolder
+            
             # Open Visual Studio Code in the selected folder
             Start-Process -FilePath "code" -ArgumentList $selectedFolder -WindowStyle Hidden
+            
             # Open PowerShell in the selected folder
             Start-Process -FilePath "powershell.exe" -WorkingDirectory $selectedFolder -WindowStyle Maximized
         }

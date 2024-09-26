@@ -135,7 +135,10 @@ if ($selectedWorkspace.name -match '\bship\b' -or $selectedWorkspace.name -eq 'D
             Start-Process -FilePath "code" -ArgumentList $selectedFolder -WindowStyle Hidden
             
             # Open PowerShell in the selected folder
-            Start-Process -FilePath "powershell.exe" -WorkingDirectory $selectedFolder -WindowStyle Maximized
+            #Start-Process -FilePath "powershell.exe" -WorkingDirectory $selectedFolder -WindowStyle Maximized
+
+            # Open Windows Terminal in the selected folder with 3 tabs
+            Start-Process -FilePath "wt.exe" -ArgumentList "-d `"$selectedFolder`" ; new-tab -d `"$selectedFolder`" ; new-tab -d `"$selectedFolder`"" -WindowStyle Maximized
         }
     }
 }

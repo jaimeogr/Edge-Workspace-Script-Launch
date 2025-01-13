@@ -50,7 +50,7 @@ function Read-SingleKey {
 
             $substring = $globalValidCharacters.Substring(1, $Number_Of_Items)
             
-            if($inputChar -eq 0){
+            if ($inputChar -eq 0) {
                 $key = '0'
                 return $key
             }
@@ -124,32 +124,44 @@ if ($selectedWorkspace.name -match '\bship\b' -or $selectedWorkspace.name -eq 'D
             Open-EdgeWorkspaceWindow -Selected_Workspace_ID $workspaceID -Selected_Workspace_Name $workspaceName
             Write-Host "Exiting the script."
             exit
-        } else {
+        }
+        else {
             $folderIndex = $globalValidCharacters.IndexOf([char]$chosenFolder) - 1
             $selectedFolder = $folders[$folderIndex].FullName
             
+            if ( $selectedFolder -eq "C:\Users\$username\OneDrive\Documentos\Projects\Jardinero-Gaucho") {
+                # If the project is Jardinero-Gaucho
+                Write-Host "`nRun android emulator or not?"
+            
+                # Define emulator options
+                $androidEmulatorOptions = @("Yes", "No")
+                Show-ListOfItems -Items $androidEmulatorOptions
+
+                # Read user's choice
+                $runAndroidEmulator = Read-SingleKey -Number_Of_Items $androidEmulatorOptions.Count
+
+                if ($runAndroidEmulator -eq "1") {
+                    # User chose to run the Android emulator
+                    Start-Process -FilePath "wt.exe" -ArgumentList "-p Root powershell.exe -NoExit -Command npm run c1 ; new-tab -p Root ; new-tab -p Frontend ; new-tab -p Frontend ; new-tab -p Backend ; new-tab -p Backend" -WindowStyle Maximized
+                }
+                else {
+                    Start-Process -FilePath "wt.exe" -ArgumentList "-p Root ; new-tab -p Root ; new-tab -p Frontend ; new-tab -p Frontend ; new-tab -p Backend ; new-tab -p Backend" -WindowStyle Maximized
+                }
+            }
+            else {
+                # if the project is not Jardinero-Gaucho
+                # Open Windows Terminal in the selected folder with 3 tabs
+                Start-Process -FilePath "wt.exe" -ArgumentList "-d `"$selectedFolder`" ; new-tab -d `"$selectedFolder`" ; new-tab -d `"$selectedFolder`" ; new-tab -d `"$selectedFolder`"" -WindowStyle Maximized
+            }
+
             # Open the selected folder in File Explorer
             Start-Process explorer.exe -ArgumentList $selectedFolder
             
             # Open Visual Studio Code in the selected folder
             Start-Process -FilePath "code" -ArgumentList $selectedFolder -WindowStyle Hidden
-            
-            # Open PowerShell in the selected folder
-            #Start-Process -FilePath "powershell.exe" -WorkingDirectory $selectedFolder -WindowStyle Maximized
-
-            if( $selectedFolder -eq "C:\Users\$username\OneDrive\Documentos\Projects\Jardinero-Gaucho"){
-                # if the projets is Jardinero-Gaucho
-                Start-Process -FilePath "wt.exe" -ArgumentList "-p Root powershell.exe -NoExit -Command npm run c1 ; new-tab -p Root ; new-tab -p Frontend ; new-tab -p Frontend ; new-tab -p Backend ; new-tab -p Backend" -WindowStyle Maximized
-
-            } else {
-                # if the project is not Jardinero-Gaucho
-                # Open Windows Terminal in the selected folder with 3 tabs
-                Start-Process -FilePath "wt.exe" -ArgumentList "-d `"$selectedFolder`" ; new-tab -d `"$selectedFolder`" ; new-tab -d `"$selectedFolder`" ; new-tab -d `"$selectedFolder`"" -WindowStyle Maximized
-            }
         }
     }
 }
-
 
 Open-EdgeWorkspaceWindow -Selected_Workspace_ID $workspaceID -Selected_Workspace_Name $workspaceName
 

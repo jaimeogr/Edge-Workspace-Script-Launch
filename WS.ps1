@@ -137,8 +137,15 @@ if ($selectedWorkspace.name -match '\bship\b' -or $selectedWorkspace.name -eq 'D
             # Open PowerShell in the selected folder
             #Start-Process -FilePath "powershell.exe" -WorkingDirectory $selectedFolder -WindowStyle Maximized
 
-            # Open Windows Terminal in the selected folder with 3 tabs
-            Start-Process -FilePath "wt.exe" -ArgumentList "-d `"$selectedFolder`" ; new-tab -d `"$selectedFolder`" ; new-tab -d `"$selectedFolder`" ; new-tab -d `"$selectedFolder`"" -WindowStyle Maximized
+            if( $selectedFolder -eq "C:\Users\$username\OneDrive\Documentos\Projects\Jardinero-Gaucho"){
+                # if the projets is Jardinero-Gaucho
+                Start-Process -FilePath "wt.exe" -ArgumentList "-p Root powershell.exe -NoExit -Command npm run c1 ; new-tab -p Frontend ; new-tab -p Frontend ; new-tab -p Backend" -WindowStyle Maximized
+
+            } else {
+                # if the project is not Jardinero-Gaucho
+                # Open Windows Terminal in the selected folder with 3 tabs
+                Start-Process -FilePath "wt.exe" -ArgumentList "-d `"$selectedFolder`" ; new-tab -d `"$selectedFolder`" ; new-tab -d `"$selectedFolder`" ; new-tab -d `"$selectedFolder`"" -WindowStyle Maximized
+            }
         }
     }
 }

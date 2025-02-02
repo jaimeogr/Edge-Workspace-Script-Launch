@@ -102,7 +102,7 @@ $workspaceName = $selectedWorkspace.name
 
 # if the workspace has the word "ship", but "shipping" will be false. then it will prompt to open a project in visual studio code and a powershell window.
 if ($selectedWorkspace.name -match '\bship\b' -or $selectedWorkspace.name -eq 'DS') {
-    $projectsFoldersPath = "C:\Users\$username\OneDrive\Documentos\Projects"
+    $projectsFoldersPath = "C:\Projects"
 	
     # Check for available folders in the specified directory
     $folders = Get-ChildItem -Path $projectsFoldersPath -Directory
@@ -129,7 +129,7 @@ if ($selectedWorkspace.name -match '\bship\b' -or $selectedWorkspace.name -eq 'D
             $folderIndex = $globalValidCharacters.IndexOf([char]$chosenFolder) - 1
             $selectedFolder = $folders[$folderIndex].FullName
             
-            if ( $selectedFolder -eq "C:\Users\$username\OneDrive\Documentos\Projects\Jardinero-Gaucho") {
+            if ( $selectedFolder -eq "C:\Projects\Jardinero-Gaucho") {
                 # If the project is Jardinero-Gaucho
                 Write-Host "`nRun android emulator or not?"
             

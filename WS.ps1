@@ -106,7 +106,7 @@ else {
     }
 }
 
-Start-Process -FilePath "msedge.exe" -ArgumentList "--start-maximized --no-startup-window"
+Start-Process -FilePath "msedge.exe" -ArgumentList "--new-window --start-maximized"
 
 
 exit

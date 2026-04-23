@@ -86,10 +86,10 @@ else {
 
             if ($runAndroidEmulator -eq "1") {
                 # User chose to run the Android emulator
-                Start-Process -FilePath "wt.exe" -ArgumentList "-p Root powershell.exe -NoExit -Command npm run c1 ; new-tab -p Root ; new-tab -p Frontend ; new-tab -p Frontend ; new-tab -p Backend ; new-tab -p Backend" -WindowStyle Maximized
+                Start-Process -FilePath "wt.exe" -ArgumentList "-p Root powershell.exe -NoExit -Command npm run c1 ; new-tab -p Root ; new-tab -p Frontend ; new-tab -p Frontend" -WindowStyle Maximized
             }
             else {
-                Start-Process -FilePath "wt.exe" -ArgumentList "-p Root ; new-tab -p Root ; new-tab -p Frontend ; new-tab -p Frontend ; new-tab -p Backend ; new-tab -p Backend" -WindowStyle Maximized
+                Start-Process -FilePath "wt.exe" -ArgumentList "-p Root ; new-tab -p Root ; new-tab -p Frontend ; new-tab -p Frontend" -WindowStyle Maximized
             }
         }
         else {
@@ -101,8 +101,8 @@ else {
         # Open the selected folder in File Explorer
         Start-Process explorer.exe -ArgumentList $selectedFolder
         
-        # Open Visual Studio Code in the selected folder
-        Start-Process -FilePath "code" -ArgumentList $selectedFolder -WindowStyle Hidden
+        # Open Cursor in the selected folder
+        Start-Process -FilePath "cursor" -ArgumentList $selectedFolder -WindowStyle Hidden
     }
 }
 
